@@ -1,0 +1,188 @@
+# "org" ensures this Service is used with the correct Serverless Framework License Key.
+#org: jrecitas
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: arsci
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-southeast-1
+  environment:
+    STUDENT_TABLE: arsci-db-student
+    TEACHER_TABLE: arsci-db-teachers
+    SECTION_TABLE: arsci-db-sections
+    SECTION_MODULES_TABLE: arsci-db-section-modules
+    JWT_SECRET: ${env:JWT_SECRET}
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+          Resource: arn:aws:dynamodb:ap-southeast-1:474668381807:table/arsci-db-*
+
+functions:
+  studentLogin:
+    handler: src/students/studentLoginService.studentLogin
+    events:
+      - http:
+          path: students/login
+          method: post
+          cors: true
+
+  createStudent:
+    handler: src/students/studentService.createStudent
+    events:
+      - http:
+          path: students
+          method: post
+          cors: true
+
+  getStudent:
+    handler: src/students/studentService.getStudent
+    events:
+      - http:
+          path: students/{username}
+          method: get
+          cors: true
+
+  updateStudent:
+    handler: src/students/studentService.updateStudent
+    events:
+      - http:
+          path: students/{username}
+          method: put
+          cors: true
+
+  deleteStudent:
+    handler: src/students/studentService.deleteStudent
+    events:
+      - http:
+          path: students/{username}
+          method: delete
+          cors: true
+
+  listStudents:
+    handler: src/students/studentService.listStudents
+    events:
+      - http:
+          path: students
+          method: get
+          cors: true
+
+  migrateStudents:
+    handler: src/students/studentService.migrateStudents
+    events:
+      - http:
+          path: students/migrate
+          method: post
+          cors: true
+
+  ##Section
+  createSection:
+    handler: src/sections/sectionService.createSection
+    events:
+      - http:
+          path: sections
+          method: post
+          cors: true
+
+  getSection:
+    handler: src/sections/sectionService.getSection
+    events:
+      - http:
+          path: sections/{sectionID}
+          method: get
+          cors: true
+
+  updateSection:
+    handler: src/sections/sectionService.updateSection
+    events:
+      - http:
+          path: sections/{sectionID}
+          method: put
+          cors: true
+
+  deleteSection:
+    handler: src/sections/sectionService.deleteSection
+    events:
+      - http:
+          path: sections/{sectionID}
+          method: delete
+          cors: true
+
+  listSections:
+    handler: src/sections/sectionService.listSections
+    events:
+      - http:
+          path: sections
+          method: get
+          cors: true
+
+  ##Teacher
+  # Password-based signup/login removed in favor of Google Sign-In
+
+  getTeacher:
+    handler: src/teacher/teacherService.getTeacher
+    events:
+      - http:
+          path: teachers/{email}
+          method: get
+          cors: true
+
+  updateTeacher:
+    handler: src/teacher/teacherService.updateTeacher
+    events:
+      - http:
+          path: teachers/{email}
+          method: put
+          cors: true
+
+  ## Module & Quiz
+  updateQuiz:
+    handler: src/modules/moduleService.updateQuiz
+    events:
+      - http:
+          path: modules/updatequiz
+          method: put
+          cors: true
+
+  getQuizResult:
+    handler: src/modules/moduleService.getQuizResult
+    events:
+      - http:
+          path: modules/quiz-result
+          method: get
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                sectionID: true
+                moduleID: true
+
+  ## Progress
+  updateProgress:
+    handler: src/modules/moduleService.updateProgress
+    events:
+      - http:
+          path: modules/updateprogress
+          method: put
+          cors: true
+
+  # Google OAuth token exchange -> issues app JWT
+  authGoogle:
+    handler: src/auth/googleAuth.handler
+    events:
+      - http:
+          path: auth/google
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline

@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+
+# Serverless build artifacts
+.serverless/
+.webpack/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment files
+.env
+.env.*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# VSCode settings (optional)
+.vscode/
+
+# Coverage and test
+coverage/
+.nyc_output/
+
+# Local AWS credentials (optional)
+.aws/
+
+# IDEs and editors
+.idea/
+*.swp
+*.swo
